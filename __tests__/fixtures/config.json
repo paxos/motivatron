@@ -1,0 +1,49 @@
+{
+  "teams": [
+    {
+      "name": "coreUX",
+      "slackIncomingHook": "https://hooks.slack.com/services/abc/cde/efg",
+      "intercomTeams": [
+        {
+          "inboxName": "Team #1 Inbox",
+          "team": "875317",
+          "token": "abc="
+        }
+      ],
+      "devOpsTeams": [
+        {
+          "team": "011deb67-8b0b-4668-a530-5ffb4ffc022f",
+          "token": "abc",
+          "collection": "collection",
+          "project": "project",
+          "repository": "repository"
+        }
+      ]
+    },
+    {
+      "name": "Another team",
+      "slackIncomingHook": "https://hooks.slack.com/services/abc/cde/efg",
+      "intercomTeams": [
+        {
+          "inboxName": "Inbox 1",
+          "team": "875317",
+          "token": "abc"
+        },
+        {
+          "inboxName": "Inbox 2",
+          "team": "875317",
+          "token": "abc"
+        }
+      ],
+      "devOpsTeams": [
+        {
+          "team": "011deb67-8b0b-4668-a530-5ffb4ffc022f",
+          "token": "abc",
+          "collection": "collection",
+          "project": "project",
+          "repository": "repository"
+        }
+      ]
+    }
+  ]
+}

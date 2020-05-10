@@ -1,0 +1,20 @@
+{
+  "teams": [
+    {
+      "name": "",
+      "slackIncomingHook": "",
+      "intercomTeams": [
+        {
+          "team": "",
+          "token": ""
+        }
+      ],
+      "devOpsTeams": [
+        {
+          "team": "",
+          "token": ""
+        }
+      ]
+    }
+  ]
+}

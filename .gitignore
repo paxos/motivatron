@@ -1,0 +1,7 @@
+/node_modules
+/.idea
+/out/*
+/__tests__/payloads
+/.DS_Store
+/dist
+/config.json

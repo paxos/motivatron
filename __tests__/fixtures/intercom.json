@@ -1,0 +1,86 @@
+{
+  "type": "conversation.list",
+  "pages": {
+    "type": "pages",
+    "next": null,
+    "page": 1,
+    "per_page": 20,
+    "total_pages": 1
+  },
+  "conversations": [
+    {
+      "type": "conversation",
+      "id": "26994028692",
+      "created_at": 1588952698,
+      "updated_at": 1588974915,
+      "waiting_since": 64702878423,
+      "snoozed_until": 1589212800,
+      "assignee": {
+        "type": "admin",
+        "id": "875317"
+      },
+      "open": true,
+      "state": "snoozed",
+      "read": false,
+      "conversation_message": {
+        "type": "conversation_message",
+        "id": "550214617",
+        "subject": "",
+        "body": "",
+        "author": {
+          "type": "user",
+          "id": "123"
+        },
+        "attachments": [],
+        "url": null
+      },
+      "customers": [
+        {
+          "type": "user",
+          "id": "123"
+        }
+      ],
+      "user": {
+        "type": "user",
+        "id": "123"
+      }
+    },
+    {
+      "type": "conversation",
+      "id": "26984191759",
+      "created_at": 1588890686,
+      "updated_at": 1588955598,
+      "waiting_since": 64702822385,
+      "snoozed_until": 1589212800,
+      "assignee": {
+        "type": "admin",
+        "id": "875317"
+      },
+      "open": true,
+      "state": "snoozed",
+      "read": false,
+      "conversation_message": {
+        "type": "conversation_message",
+        "id": "12345",
+        "subject": "",
+        "body": "",
+        "author": {
+          "type": "user",
+          "id": "1234"
+        },
+        "attachments": [],
+        "url": null
+      },
+      "customers": [
+        {
+          "type": "user",
+          "id": "1234"
+        }
+      ],
+      "user": {
+        "type": "user",
+        "id": "1234"
+      }
+    }
+  ]
+}
