@@ -2,6 +2,6 @@
 /.idea
 /out/*
 /__tests__/payloads
-/.DS_Store
 /dist
-/config.json
+*.DS_Store
+*config.json
