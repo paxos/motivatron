@@ -26,10 +26,13 @@ export class DevOpsClient {
     for (let pullRequest of pullRequests) {
       let filterHit = false;
       for (let filter of this.devOpsTeam.filters) {
-        let regex = RegExp(filter);
-        if (regex.test(pullRequest.title)) {
-          this.context.log(`PR hit filter, filtering… ${pullRequest.title}`);
-          filterHit = true;
+        if (filter instanceof RegExp) {
+          if (filter.test(pullRequest.title)) {
+            this.context.log(`PR hit filter, filtering… ${pullRequest.title}`);
+            filterHit = true;
+          }
+        } else {
+          this.context.log(`Invalid filter ${filter}`);
         }
       }
 
