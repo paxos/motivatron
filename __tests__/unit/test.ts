@@ -7,6 +7,32 @@ import { IConfig } from "../../config/config";
 import { DevOpsResponse, PullRequest } from "../../lib/models/devOpsResponse";
 
 const fs = require("fs");
+
+function MakePRsPayloadWithThoseNames(names: string[]) {
+  // use the base fixture
+  let fixture: DevOpsResponse = require("../fixtures/devops.json");
+
+  // get base PR
+  let basePR: PullRequest = fixture.value[0];
+
+  let result: DevOpsResponse = {
+    value: [],
+    count: names.length,
+  };
+
+  // Loop, randomize ID and give it a name
+  for (let name of names) {
+    let newPR: PullRequest = {
+      ...basePR,
+      pullRequestId: Math.floor(Math.random() * Math.floor(10000000)),
+      title: name,
+    };
+    result.value.push(newPR);
+  }
+
+  return result;
+}
+
 describe("Unit Tests", function () {
   let testContext: IContext = {
     log(message: string) {
@@ -45,30 +71,25 @@ describe("Unit Tests", function () {
     };
   });
 
-  function MakePRsPayloadWithThoseNames(names: string[]) {
-    // use the base fixture
-    let fixture: DevOpsResponse = require("../fixtures/devops.json");
+  describe("Final Message", async function () {
+    it("should generate what we expect", async function () {
+      let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
 
-    // get base PR
-    let basePR: PullRequest = fixture.value[0];
+      let motivatron = new Motivatron(testContext, config);
+      await motivatron.doThings();
 
-    let result: DevOpsResponse = {
-      value: [],
-      count: names.length,
-    };
+      expect(slackSpy).toBeCalledTimes(2);
+      expect(slackSpy).toHaveBeenNthCalledWith(
+        1,
+        "1 PR is waiting for review. Team #1 Inbox looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/43628: PR Title\n"
+      );
 
-    // Loop, randomize ID and give it a name
-    for (let name of names) {
-      let newPR: PullRequest = {
-        ...basePR,
-        pullRequestId: Math.floor(Math.random() * Math.floor(10000000)),
-        title: name,
-      };
-      result.value.push(newPR);
-    }
-
-    return result;
-  }
+      expect(slackSpy).toHaveBeenNthCalledWith(
+        2,
+        "1 PR is waiting for review. Inbox 1 looks clear! 🙌 2 tickets on snooze. Inbox 2 looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/43628: PR Title\n"
+      );
+    });
+  });
 
   describe("Filtering", function () {
     let team;
@@ -131,23 +152,5 @@ describe("Unit Tests", function () {
 
       expect(filteredPRs.value.length).toBe(3);
     });
-  });
-
-  it("should generate what we expect", async function () {
-    let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
-
-    let motivatron = new Motivatron(testContext, config);
-    await motivatron.doThings();
-
-    expect(slackSpy).toBeCalledTimes(2);
-    expect(slackSpy).toHaveBeenNthCalledWith(
-      1,
-      "1 PR is waiting for review. Team #1 Inbox looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/43628: PR Title\n"
-    );
-
-    expect(slackSpy).toHaveBeenNthCalledWith(
-      2,
-      "1 PR is waiting for review. Inbox 1 looks clear! 🙌 2 tickets on snooze. Inbox 2 looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/43628: PR Title\n"
-    );
   });
 });
