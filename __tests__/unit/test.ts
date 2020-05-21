@@ -50,7 +50,7 @@ describe("Unit Tests", function () {
       // Explaination: https://stackoverflow.com/questions/49652411/jest-mock-individual-function-from-es6-class
       // Note: This can not be an arrow function. This makes sure `this` will be bound to the current instance.
 
-      SlackClient.prototype.sendToSlack = jest
+      SlackClient.prototype.sendToSlackInternal = jest
         .fn()
         .mockImplementation(function (message) {
           let options = this.makePayload(message);
@@ -73,33 +73,37 @@ describe("Unit Tests", function () {
     });
 
     it("should generate what we expect", async function () {
-      let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
+      let sendToSlackInternalSpy = jest.spyOn(
+        SlackClient.prototype,
+        "sendToSlackInternal"
+      );
 
       let motivatron = new Motivatron(testContext, config);
       await motivatron.doThings();
 
-      expect(slackSpy).toBeCalledTimes(2);
-      expect(slackSpy).toHaveBeenNthCalledWith(
+      expect(sendToSlackInternalSpy).toBeCalledTimes(2);
+      expect(sendToSlackInternalSpy).toHaveBeenNthCalledWith(
         1,
         "2 PRs are waiting for review. Team #1 Inbox looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n"
       );
 
-      expect(slackSpy).toHaveBeenNthCalledWith(
+      expect(sendToSlackInternalSpy).toHaveBeenNthCalledWith(
         2,
         "2 PRs are waiting for review. Inbox 1 looks clear! 🙌 2 tickets on snooze. Inbox 2 looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n"
       );
     });
 
     it("should generate what we expect with filters configured", async function () {
-      let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
+      let sendToSlackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
       config.teams[0].devOpsTeams[0].filters = [/^(\[Prefixed])/];
       let motivatron = new Motivatron(testContext, config);
 
       await motivatron.doThings();
 
-      expect(slackSpy).toBeCalledTimes(2);
-      expect(slackSpy).toHaveBeenCalledWith(
-        "1 PR is waiting for review. Team #1 Inbox looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n"
+      expect(sendToSlackSpy).toHaveBeenCalledWith(
+        "1 PR is waiting for review.",
+        expect.anything(),
+        expect.anything()
       );
     });
   });

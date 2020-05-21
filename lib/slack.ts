@@ -2,10 +2,7 @@ import { IConfigTeam } from "../config/config";
 import { IContext } from "./context";
 const axios = require("axios").default;
 
-export interface ISlackClient {
-  sendToSlack(message: string): void;
-}
-export abstract class SlackBaseClient implements ISlackClient {
+export class SlackClient {
   protected team: IConfigTeam;
   protected context: IContext;
 
@@ -27,11 +24,18 @@ export abstract class SlackBaseClient implements ISlackClient {
     };
   }
 
-  abstract sendToSlack(message: string): void;
-}
+  async sendToSlack(
+    devOpsPart: string,
+    intercomPart: string,
+    urls: string
+  ): Promise<void> {
+    let result = [devOpsPart, intercomPart];
+    let message = result.join(" ") + urls;
 
-export class SlackClient extends SlackBaseClient implements ISlackClient {
-  async sendToSlack(message: string): Promise<void> {
+    this.context.log(message);
+    return this.sendToSlackInternal(message);
+  }
+  async sendToSlackInternal(message: string): Promise<void> {
     let options = this.makePayload(message);
 
     try {
