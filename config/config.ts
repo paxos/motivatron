@@ -24,7 +24,7 @@ export interface IDevOpsTeam {
   collection: string;
   project: string;
   repository: string;
-  filters?: RegExp[]; // Matches pull requests whos names match one of those regex
+  filters?: RegExp[]; // Excludes pull requests who's title matches one of the regular expressions
 }
 
 export function getConfig(path = "./config/config.json"): IConfig {
