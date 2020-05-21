@@ -206,7 +206,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
 }
 export class DevOpsClient extends DevOpsBaseClient implements IDevOpsClient {
   async fetchPullRequests() {
-    this.pullRequests = await this.fetchPullRequestsInternal();
+    this.pullRequests = this.filterPRs(await this.fetchPullRequestsInternal());
     //this.closedPullRequests = await this.fetchPullRequestsInternal(true);
   }
 
