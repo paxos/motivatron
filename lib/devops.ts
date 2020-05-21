@@ -5,32 +5,7 @@ import { IContext } from "./context";
 let moment = require("moment-timezone");
 const axios = require("axios").default;
 
-export interface IDevOpsClient {
-  fetchPullRequests(): Promise<any>;
-
-  findPRsWithNoVote(filterList: boolean);
-
-  PRsToURLList(): string;
-
-  getTextVSTS(): string;
-
-  pr(count: number): string;
-
-  isAre(count: number): string;
-
-  wasWere(count: number): string;
-
-  numberOfPRs(): any;
-
-  findPRsReviewedToday(payload): void;
-
-  findPRsOpenedToday(): any;
-
-  findPRsClosedToday(): any;
-
-  sameDay(date1: Date, date2: Date): any;
-}
-export abstract class DevOpsBaseClient implements IDevOpsClient {
+export class DevOpsClient {
   protected devOpsTeam: IDevOpsTeam;
   protected context: IContext;
   pullRequests: DevOpsResponse;
@@ -41,18 +16,14 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
     this.devOpsTeam = devOpsTeam;
   }
 
-  abstract async fetchPullRequests(): Promise<any>;
-
-  filterPRs(devOpsResponse: DevOpsResponse): DevOpsResponse {
-    if (!this.devOpsTeam.filters) {
+  filterPRs(pullRequests: PullRequest[]): PullRequest[] {
     if (!Array.isArray(this.devOpsTeam.filters)) {
-      return devOpsResponse;
+      return pullRequests;
     }
 
-    const result = { ...devOpsResponse };
-    result.value = [];
+    const result: PullRequest[] = [];
 
-    for (let PR of devOpsResponse.value) {
+    for (let PR of pullRequests) {
       let filterHit = false;
       for (let filter of this.devOpsTeam.filters) {
         let regex = RegExp(filter);
@@ -63,17 +34,15 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
       }
 
       if (!filterHit) {
-        result.value.push(PR);
+        result.push(PR);
       }
     }
 
-    result.count = result.value.length;
     return result;
   }
 
-  findPRsWithNoVote() {
-    let payload = this.pullRequests;
-    let relevantPRs = [];
+  findPRsWithNoVote(payload: DevOpsResponse): PullRequest[] {
+    let relevantPRs: PullRequest[] = [];
     payload.value.forEach((pr) => {
       let reviewers = pr.reviewers;
       reviewers.forEach((reviewer) => {
@@ -90,7 +59,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
   }
 
   PRsToURLList() {
-    let prs = this.findPRsWithNoVote();
+    let prs = this.findPRsWithNoVote(this.pullRequests);
     if (!prs || !Array.isArray(prs)) {
       return "";
     }
@@ -109,9 +78,18 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
   }
 
   getTextVSTS() {
-    let openedTodayCount = this.findPRsOpenedToday();
-    let closedTodayCount = this.findPRsClosedToday();
-    let filteredNoReviewPRsList = this.findPRsWithNoVote();
+    let openedTodayCount = this.findPRsOpenedToday(this.pullRequests);
+    let closedTodayCount = this.findPRsClosedToday(this.pullRequests);
+    let noReviewPRsList: PullRequest[] = this.findPRsWithNoVote(
+      this.pullRequests
+    );
+    let filteredNoReviewPRsList: PullRequest[] = this.filterPRs(
+      noReviewPRsList
+    );
+
+    let filteredPRCount =
+      noReviewPRsList.length - filteredNoReviewPRsList.length;
+
     let noReviewCount = filteredNoReviewPRsList.length;
 
     if (
@@ -131,6 +109,10 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
       firstPart = `${noReviewCount} ${this.pr(noReviewCount)} ${this.isAre(
         noReviewCount
       )} waiting for review`;
+    }
+
+    if (filteredPRCount > 0) {
+      firstPart += ` (${filteredPRCount} filtered)`;
     }
 
     if (openedTodayCount === 0 && closedTodayCount === 0) {
@@ -176,8 +158,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
     // API missing, reviewers does not have a date :(
   }
 
-  findPRsOpenedToday() {
-    let payload = this.pullRequests;
+  findPRsOpenedToday(payload: DevOpsResponse) {
     let result = payload.value.filter(
       (pr) =>
         pr.creationDate &&
@@ -187,8 +168,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
     return result.length;
   }
 
-  findPRsClosedToday() {
-    let payload = this.pullRequests;
+  findPRsClosedToday(payload: DevOpsResponse) {
     let result = payload.value.filter(
       (pr) =>
         pr.closedDate &&
@@ -203,10 +183,9 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
       .tz("America/Los_Angeles")
       .isSame(moment(date2).tz("America/Los_Angeles"), "day");
   }
-}
-export class DevOpsClient extends DevOpsBaseClient implements IDevOpsClient {
+
   async fetchPullRequests() {
-    this.pullRequests = this.filterPRs(await this.fetchPullRequestsInternal());
+    this.pullRequests = await this.fetchPullRequestsInternal();
     //this.closedPullRequests = await this.fetchPullRequestsInternal(true);
   }
 

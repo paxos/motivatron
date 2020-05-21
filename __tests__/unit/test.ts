@@ -8,7 +8,7 @@ import { DevOpsResponse, PullRequest } from "../../lib/models/devOpsResponse";
 
 const fs = require("fs");
 
-function MakePRsPayloadWithThoseNames(names: string[]) {
+function MakePRsPayloadWithThoseNames(names: string[]): DevOpsResponse {
   // use the base fixture
   let fixture: DevOpsResponse = require("../fixtures/devops.json");
 
@@ -41,6 +41,9 @@ describe("Unit Tests", function () {
   };
 
   let config: IConfig;
+  beforeEach(() => {
+    config = JSON.parse(fs.readFileSync("./__tests__/fixtures/config.json"));
+  });
 
   describe("Final Message", async function () {
     beforeEach(() => {
@@ -54,7 +57,7 @@ describe("Unit Tests", function () {
         .fn()
         .mockImplementation(function (message) {
           let options = this.makePayload(message);
-          console.log("Sending to Slack:");
+          console.log("Using mock Slack");
           console.log(options);
         });
 
@@ -117,7 +120,7 @@ describe("Unit Tests", function () {
 
   describe("Filtering", function () {
     let team;
-    let PRs;
+    let PRs: DevOpsResponse;
 
     beforeEach(() => {
       team = config.teams[0].devOpsTeams[0];
@@ -133,48 +136,56 @@ describe("Unit Tests", function () {
 
     it("dont fail if filters are null", function () {
       team.filters = null;
-      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(PRs);
+      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
+        PRs.value
+      );
 
-      expect(filteredPRs.value.length).toBe(PRs.value.length);
+      expect(filteredPRs.length).toBe(PRs.value.length);
     });
 
     it("dont fail if filters are undefined", function () {
       team.filters = null;
-      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(PRs);
+      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
+        PRs.value
+      );
 
-      expect(filteredPRs.value.length).toBe(PRs.value.length);
+      expect(filteredPRs.length).toBe(PRs.value.length);
     });
 
     it("should not filters anything", function () {
       team.filters = [];
-      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(PRs);
+      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
+        PRs.value
+      );
 
-      expect(filteredPRs.value.length).toBe(PRs.value.length);
+      expect(filteredPRs.length).toBe(PRs.value.length);
     });
 
     it("should filter one", function () {
       team.filters = [/^(\[aks])/];
-      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(PRs);
-
-      expect(filteredPRs.value.length).toBe(
-        PRs.value.length - team.filters.length
+      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
+        PRs.value
       );
+
+      expect(filteredPRs.length).toBe(PRs.value.length - team.filters.length);
     });
 
     it("should filter both", function () {
       team.filters = [/^(\[aks])/, /^(Dependabot)/];
-      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(PRs);
-
-      expect(filteredPRs.value.length).toBe(
-        PRs.value.length - team.filters.length
+      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
+        PRs.value
       );
+
+      expect(filteredPRs.length).toBe(PRs.value.length - team.filters.length);
     });
 
     it("should filter multiple times", function () {
       team.filters = [/^(Pull )/];
-      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(PRs);
+      let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
+        PRs.value
+      );
 
-      expect(filteredPRs.value.length).toBe(3);
+      expect(filteredPRs.length).toBe(3);
     });
   });
 });
