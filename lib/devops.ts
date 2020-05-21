@@ -45,6 +45,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
 
   filterPRs(devOpsResponse: DevOpsResponse): DevOpsResponse {
     if (!this.devOpsTeam.filters) {
+    if (!Array.isArray(this.devOpsTeam.filters)) {
       return devOpsResponse;
     }
 
