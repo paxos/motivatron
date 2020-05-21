@@ -100,8 +100,15 @@ describe("Unit Tests", function () {
 
       await motivatron.doThings();
 
-      expect(sendToSlackSpy).toHaveBeenCalledWith(
-        "1 PR is waiting for review.",
+      expect(sendToSlackSpy).toHaveBeenNthCalledWith(
+        1,
+        "1 PR is waiting for review (1 filtered).",
+        expect.anything(),
+        expect.anything()
+      );
+      expect(sendToSlackSpy).toHaveBeenNthCalledWith(
+        2,
+        "2 PRs are waiting for review.",
         expect.anything(),
         expect.anything()
       );
