@@ -1,8 +1,8 @@
 export interface DevOpsResponse {
-  value?: ValueEntity[] | null;
+  value?: PullRequest[] | null;
   count: number;
 }
-export interface ValueEntity {
+export interface PullRequest {
   repository: Repository;
   pullRequestId: number;
   codeReviewId: number;

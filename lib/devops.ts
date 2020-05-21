@@ -1,4 +1,4 @@
-import { DevOpsResponse } from "./models/devOpsResponse";
+import { DevOpsResponse, PullRequest } from "./models/devOpsResponse";
 import { IDevOpsTeam } from "../config/config";
 import { IContext } from "./context";
 
@@ -8,7 +8,7 @@ const axios = require("axios").default;
 export interface IDevOpsClient {
   fetchPullRequests(): Promise<any>;
 
-  findPRsWithNoVote();
+  findPRsWithNoVote(filterList: boolean);
 
   PRsToURLList(): string;
 
@@ -42,6 +42,33 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
   }
 
   abstract async fetchPullRequests(): Promise<any>;
+
+  filterPRs(devOpsResponse: DevOpsResponse): DevOpsResponse {
+    if (!this.devOpsTeam.filters) {
+      return devOpsResponse;
+    }
+
+    const result = { ...devOpsResponse };
+    result.value = [];
+
+    for (let PR of devOpsResponse.value) {
+      let filterHit = false;
+      for (let filter of this.devOpsTeam.filters) {
+        let regex = RegExp(filter);
+        if (regex.test(PR.title)) {
+          this.context.log(`PR hit filter, filtering… ${PR.title}`);
+          filterHit = true;
+        }
+      }
+
+      if (!filterHit) {
+        result.value.push(PR);
+      }
+    }
+
+    result.count = result.value.length;
+    return result;
+  }
 
   findPRsWithNoVote() {
     let payload = this.pullRequests;
@@ -81,12 +108,17 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
   }
 
   getTextVSTS() {
-    let openedToday = this.findPRsOpenedToday();
-    let closedToday = this.findPRsClosedToday();
-    let noReviewPRs = this.findPRsWithNoVote();
-    let noReviewCount = noReviewPRs.length;
+    let openedTodayCount = this.findPRsOpenedToday();
+    let closedTodayCount = this.findPRsClosedToday();
+    let filteredNoReviewPRsList = this.findPRsWithNoVote();
+    // let filteredPRsCount = this.findPRsWithNoVote(false).length - filteredNoReviewPRsList.length;
+    let noReviewCount = filteredNoReviewPRsList.length;
 
-    if (noReviewCount === 0 && openedToday === 0 && closedToday === 0) {
+    if (
+      noReviewCount === 0 &&
+      openedTodayCount === 0 &&
+      closedTodayCount === 0
+    ) {
       return "🌵 There is nothing todo on VSTS. Woot?";
     }
 
@@ -101,22 +133,22 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
       )} waiting for review`;
     }
 
-    if (openedToday === 0 && closedToday === 0) {
+    if (openedTodayCount === 0 && closedTodayCount === 0) {
       firstPart += ".";
     } else {
       firstPart += ", ";
     }
 
     let secondPart = "";
-    if (openedToday > 0 || closedToday > 0) {
-      secondPart = `${openedToday} ${this.pr(openedToday)} ${this.wasWere(
-        openedToday
-      )} created`;
+    if (openedTodayCount > 0 || closedTodayCount > 0) {
+      secondPart = `${openedTodayCount} ${this.pr(
+        openedTodayCount
+      )} ${this.wasWere(openedTodayCount)} created`;
 
-      if (closedToday > 0) {
-        secondPart += ` and ${closedToday} ${this.pr(
-          closedToday
-        )} ${this.wasWere(closedToday)} closed`;
+      if (closedTodayCount > 0) {
+        secondPart += ` and ${closedTodayCount} ${this.pr(
+          closedTodayCount
+        )} ${this.wasWere(closedTodayCount)} closed`;
       }
       secondPart = secondPart ? (secondPart += " today.") : secondPart;
     }
