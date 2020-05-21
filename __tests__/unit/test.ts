@@ -42,36 +42,35 @@ describe("Unit Tests", function () {
 
   let config: IConfig;
 
-  beforeEach(() => {
-    // Reset config
-    config = JSON.parse(fs.readFileSync("./__tests__/fixtures/config.json"));
-
-    // Explaination: https://stackoverflow.com/questions/49652411/jest-mock-individual-function-from-es6-class
-    // Note: This can not be an arrow function. This makes sure `this` will be bound to the current instance.
-
-    SlackClient.prototype.sendToSlack = jest
-      .fn()
-      .mockImplementation(function (message) {
-        let options = this.makePayload(message);
-        console.log("Sending to Slack:");
-        console.log(options);
-      });
-
-    IntercomClient.prototype.fetchOpenTickets = async function () {
-      console.log("Using mock IntercomClient");
-      this.tickets = require("../fixtures/intercom.json");
-    };
-
-    DevOpsClient.prototype.fetchPullRequests = async function () {
-      console.log("Using mock DevOpsBaseClient");
-      let fixture = require("../fixtures/devops.json");
-      this.pullRequests = fixture;
-      //this.closedPullRequests = fixture;
-      return fixture;
-    };
-  });
-
   describe("Final Message", async function () {
+    beforeEach(() => {
+      // Reset config
+      config = JSON.parse(fs.readFileSync("./__tests__/fixtures/config.json"));
+
+      // Explaination: https://stackoverflow.com/questions/49652411/jest-mock-individual-function-from-es6-class
+      // Note: This can not be an arrow function. This makes sure `this` will be bound to the current instance.
+
+      SlackClient.prototype.sendToSlack = jest
+        .fn()
+        .mockImplementation(function (message) {
+          let options = this.makePayload(message);
+          console.log("Sending to Slack:");
+          console.log(options);
+        });
+
+      IntercomClient.prototype.fetchOpenTickets = async function () {
+        console.log("Using mock IntercomClient");
+        this.tickets = require("../fixtures/intercom.json");
+      };
+
+      DevOpsClient.prototype.fetchPullRequests = async function () {
+        console.log("Using mock DevOpsBaseClient");
+        let fixture = require("../fixtures/devops.json");
+        this.pullRequests = fixture;
+        //this.closedPullRequests = fixture;
+        return fixture;
+      };
+    });
     it("should generate what we expect", async function () {
       let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
 
