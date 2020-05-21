@@ -5,7 +5,7 @@ import { IntercomClient } from "../../lib/intercom";
 import { SlackClient } from "../../lib/slack";
 
 const fs = require("fs");
-describe("Weird", function () {
+describe("Unit Tests", function () {
   let testContext: IContext = {
     log(message: string) {
       console.log(message);
@@ -40,7 +40,7 @@ describe("Weird", function () {
     };
   });
 
-  it("adds 1 + 2 to equal 3", async function () {
+  it("should generate what we expect", async function () {
     let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
 
     let motivatron = new Motivatron(testContext, config);
