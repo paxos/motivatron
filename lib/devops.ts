@@ -111,7 +111,6 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
     let openedTodayCount = this.findPRsOpenedToday();
     let closedTodayCount = this.findPRsClosedToday();
     let filteredNoReviewPRsList = this.findPRsWithNoVote();
-    // let filteredPRsCount = this.findPRsWithNoVote(false).length - filteredNoReviewPRsList.length;
     let noReviewCount = filteredNoReviewPRsList.length;
 
     if (
