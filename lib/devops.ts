@@ -23,18 +23,18 @@ export class DevOpsClient {
 
     const result: PullRequest[] = [];
 
-    for (let PR of pullRequests) {
+    for (let pullRequest of pullRequests) {
       let filterHit = false;
       for (let filter of this.devOpsTeam.filters) {
         let regex = RegExp(filter);
-        if (regex.test(PR.title)) {
-          this.context.log(`PR hit filter, filtering… ${PR.title}`);
+        if (regex.test(pullRequest.title)) {
+          this.context.log(`PR hit filter, filtering… ${pullRequest.title}`);
           filterHit = true;
         }
       }
 
       if (!filterHit) {
-        result.push(PR);
+        result.push(pullRequest);
       }
     }
 
@@ -59,16 +59,16 @@ export class DevOpsClient {
   }
 
   PRsToURLList() {
-    let prs = this.findPRsWithNoVote(this.pullRequests);
-    if (!prs || !Array.isArray(prs)) {
+    let pullRequests = this.findPRsWithNoVote(this.pullRequests);
+    if (!pullRequests || !Array.isArray(pullRequests)) {
       return "";
     }
 
     let result = "";
-    for (let pr of prs) {
+    for (let pullRequest of pullRequests) {
       result =
         result +
-        `- https://dev.azure.com/${this.devOpsTeam.collection}/${this.devOpsTeam.project}/_git/${this.devOpsTeam.repository}/pullrequest/${pr.pullRequestId}: ${pr.title}\n`;
+        `- https://dev.azure.com/${this.devOpsTeam.collection}/${this.devOpsTeam.project}/_git/${this.devOpsTeam.repository}/pullrequest/${pullRequest.pullRequestId}: ${pullRequest.title}\n`;
     }
 
     if (result !== "") {
