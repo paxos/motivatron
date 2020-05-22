@@ -40,7 +40,7 @@ export class Motivatron {
 
       let slackClient = new SlackClient(this.context, team);
       await slackClient.sendToSlack(
-        devOpsClient.getTextVSTS(),
+        devOpsClient.getTextAzureDevOps(),
         intercomResults.join(" "),
         devOpsClient.PRsToURLList()
       );

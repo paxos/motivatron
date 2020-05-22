@@ -81,7 +81,7 @@ export class DevOpsClient {
     return result;
   }
 
-  getTextVSTS() {
+  getTextAzureDevOps() {
     let openedTodayCount = this.findPRsOpenedToday(this.pullRequests);
     let closedTodayCount = this.findPRsClosedToday(this.pullRequests);
     let noReviewPRsList: PullRequest[] = this.findPRsWithNoVote(
@@ -101,7 +101,7 @@ export class DevOpsClient {
       openedTodayCount === 0 &&
       closedTodayCount === 0
     ) {
-      return "🌵 There is nothing todo on VSTS. Woot?";
+      return "🌵 There is nothing todo on Azure DevOps. Woot?";
     }
 
     let firstPart = "";
