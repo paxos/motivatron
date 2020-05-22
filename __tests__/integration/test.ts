@@ -15,7 +15,7 @@ describe("Integration Tests", function () {
   let config = JSON.parse(fs.readFileSync("./config.json"));
 
   beforeEach(() => {
-    SlackClient.prototype.sendToSlack = jest
+    SlackClient.prototype.sendToSlackInternal = jest
       .fn()
       .mockImplementation(function (message) {
         let options = this.makePayload(message);
@@ -25,7 +25,7 @@ describe("Integration Tests", function () {
   });
 
   it("should roll be able to fetch all the things", async function () {
-    let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
+    let slackSpy = jest.spyOn(SlackClient.prototype, "sendToSlackInternal");
 
     let motivatron = new Motivatron(testContext, config);
     await motivatron.doThings();
