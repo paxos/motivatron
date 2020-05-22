@@ -3,7 +3,7 @@ import { IContext } from "../../lib/context";
 import { DevOpsClient } from "../../lib/devops";
 import { IntercomClient } from "../../lib/intercom";
 import { SlackClient } from "../../lib/slack";
-import { IConfig } from "../../config/config";
+import { IConfig, IDevOpsTeam } from "../../config/config";
 import { DevOpsResponse, PullRequest } from "../../lib/models/devOpsResponse";
 
 const fs = require("fs");
@@ -98,7 +98,7 @@ describe("Unit Tests", function () {
 
     it("should generate what we expect with filters configured", async function () {
       let sendToSlackSpy = jest.spyOn(SlackClient.prototype, "sendToSlack");
-      config.teams[0].devOpsTeams[0].filters = [/^(\[Prefixed])/];
+      config.teams[0].devOpsTeams[0].filters = ["^(\\[Prefixed])"];
       let motivatron = new Motivatron(testContext, config);
 
       await motivatron.doThings();
@@ -119,7 +119,7 @@ describe("Unit Tests", function () {
   });
 
   describe("Filtering", function () {
-    let team;
+    let team: IDevOpsTeam;
     let PRs: DevOpsResponse;
 
     beforeEach(() => {
@@ -162,7 +162,7 @@ describe("Unit Tests", function () {
     });
 
     it("should filter one", function () {
-      team.filters = [/^(\[aks])/];
+      team.filters = ["^(\\[aks])"];
       let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
         PRs.value
       );
@@ -171,7 +171,7 @@ describe("Unit Tests", function () {
     });
 
     it("should filter both", function () {
-      team.filters = [/^(\[aks])/, /^(Dependabot)/];
+      team.filters = ["^(\\[aks])", "^(Dependabot)"];
       let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
         PRs.value
       );
@@ -180,7 +180,7 @@ describe("Unit Tests", function () {
     });
 
     it("should filter multiple times", function () {
-      team.filters = [/^(Pull )/];
+      team.filters = ["^(Pull )"];
       let filteredPRs = new DevOpsClient(testContext, team).filterPRs(
         PRs.value
       );
