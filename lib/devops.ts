@@ -9,7 +9,6 @@ export class DevOpsClient {
   protected devOpsTeam: IDevOpsTeam;
   protected context: IContext;
   pullRequests: DevOpsResponse;
-  //closedPullRequests: DevOpsResponse;
 
   constructor(context: IContext, devOpsTeam: IDevOpsTeam) {
     this.context = context;
@@ -62,8 +61,10 @@ export class DevOpsClient {
     return relevantPRs;
   }
 
-  PRsToURLList() {
-    let pullRequests = this.findPRsWithNoVote(this.pullRequests);
+  filteredPullRequestsToURLList() {
+    let pullRequests = this.filterPRs(
+      this.findPRsWithNoVote(this.pullRequests)
+    );
     if (!pullRequests || !Array.isArray(pullRequests)) {
       return "";
     }

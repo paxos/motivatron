@@ -42,7 +42,7 @@ export class Motivatron {
       await slackClient.sendToSlack(
         devOpsClient.getTextAzureDevOps(),
         intercomResults.join(" "),
-        devOpsClient.PRsToURLList()
+        devOpsClient.filteredPullRequestsToURLList()
       );
     }
   }
