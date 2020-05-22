@@ -1,36 +1,11 @@
-import { DevOpsResponse } from "./models/devOpsResponse";
+import { DevOpsResponse, PullRequest } from "./models/devOpsResponse";
 import { IDevOpsTeam } from "../config/config";
 import { IContext } from "./context";
 
 let moment = require("moment-timezone");
 const axios = require("axios").default;
 
-export interface IDevOpsClient {
-  fetchPullRequests(): Promise<any>;
-
-  findPRsWithNoVote();
-
-  PRsToURLList(): string;
-
-  getTextVSTS(): string;
-
-  pr(count: number): string;
-
-  isAre(count: number): string;
-
-  wasWere(count: number): string;
-
-  numberOfPRs(): any;
-
-  findPRsReviewedToday(payload): void;
-
-  findPRsOpenedToday(): any;
-
-  findPRsClosedToday(): any;
-
-  sameDay(date1: Date, date2: Date): any;
-}
-export abstract class DevOpsBaseClient implements IDevOpsClient {
+export class DevOpsClient {
   protected devOpsTeam: IDevOpsTeam;
   protected context: IContext;
   pullRequests: DevOpsResponse;
@@ -41,11 +16,36 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
     this.devOpsTeam = devOpsTeam;
   }
 
-  abstract async fetchPullRequests(): Promise<any>;
+  filterPRs(pullRequests: PullRequest[]): PullRequest[] {
+    if (!Array.isArray(this.devOpsTeam.filters)) {
+      return pullRequests;
+    }
 
-  findPRsWithNoVote() {
-    let payload = this.pullRequests;
-    let relevantPRs = [];
+    const result: PullRequest[] = [];
+
+    for (let pullRequest of pullRequests) {
+      let filterHit = false;
+      for (let filter of this.devOpsTeam.filters) {
+        if (filter instanceof RegExp) {
+          if (filter.test(pullRequest.title)) {
+            this.context.log(`PR hit filter, filtering… ${pullRequest.title}`);
+            filterHit = true;
+          }
+        } else {
+          this.context.log(`Invalid filter ${filter}`);
+        }
+      }
+
+      if (!filterHit) {
+        result.push(pullRequest);
+      }
+    }
+
+    return result;
+  }
+
+  findPRsWithNoVote(payload: DevOpsResponse): PullRequest[] {
+    let relevantPRs: PullRequest[] = [];
     payload.value.forEach((pr) => {
       let reviewers = pr.reviewers;
       reviewers.forEach((reviewer) => {
@@ -62,16 +62,16 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
   }
 
   PRsToURLList() {
-    let prs = this.findPRsWithNoVote();
-    if (!prs || !Array.isArray(prs)) {
+    let pullRequests = this.findPRsWithNoVote(this.pullRequests);
+    if (!pullRequests || !Array.isArray(pullRequests)) {
       return "";
     }
 
     let result = "";
-    for (let pr of prs) {
+    for (let pullRequest of pullRequests) {
       result =
         result +
-        `- https://dev.azure.com/${this.devOpsTeam.collection}/${this.devOpsTeam.project}/_git/${this.devOpsTeam.repository}/pullrequest/${pr.pullRequestId}: ${pr.title}\n`;
+        `- https://dev.azure.com/${this.devOpsTeam.collection}/${this.devOpsTeam.project}/_git/${this.devOpsTeam.repository}/pullrequest/${pullRequest.pullRequestId}: ${pullRequest.title}\n`;
     }
 
     if (result !== "") {
@@ -81,12 +81,25 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
   }
 
   getTextVSTS() {
-    let openedToday = this.findPRsOpenedToday();
-    let closedToday = this.findPRsClosedToday();
-    let noReviewPRs = this.findPRsWithNoVote();
-    let noReviewCount = noReviewPRs.length;
+    let openedTodayCount = this.findPRsOpenedToday(this.pullRequests);
+    let closedTodayCount = this.findPRsClosedToday(this.pullRequests);
+    let noReviewPRsList: PullRequest[] = this.findPRsWithNoVote(
+      this.pullRequests
+    );
+    let filteredNoReviewPRsList: PullRequest[] = this.filterPRs(
+      noReviewPRsList
+    );
 
-    if (noReviewCount === 0 && openedToday === 0 && closedToday === 0) {
+    let filteredPRCount =
+      noReviewPRsList.length - filteredNoReviewPRsList.length;
+
+    let noReviewCount = filteredNoReviewPRsList.length;
+
+    if (
+      noReviewCount === 0 &&
+      openedTodayCount === 0 &&
+      closedTodayCount === 0
+    ) {
       return "🌵 There is nothing todo on VSTS. Woot?";
     }
 
@@ -101,22 +114,26 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
       )} waiting for review`;
     }
 
-    if (openedToday === 0 && closedToday === 0) {
+    if (filteredPRCount > 0) {
+      firstPart += ` (${filteredPRCount} filtered)`;
+    }
+
+    if (openedTodayCount === 0 && closedTodayCount === 0) {
       firstPart += ".";
     } else {
       firstPart += ", ";
     }
 
     let secondPart = "";
-    if (openedToday > 0 || closedToday > 0) {
-      secondPart = `${openedToday} ${this.pr(openedToday)} ${this.wasWere(
-        openedToday
-      )} created`;
+    if (openedTodayCount > 0 || closedTodayCount > 0) {
+      secondPart = `${openedTodayCount} ${this.pr(
+        openedTodayCount
+      )} ${this.wasWere(openedTodayCount)} created`;
 
-      if (closedToday > 0) {
-        secondPart += ` and ${closedToday} ${this.pr(
-          closedToday
-        )} ${this.wasWere(closedToday)} closed`;
+      if (closedTodayCount > 0) {
+        secondPart += ` and ${closedTodayCount} ${this.pr(
+          closedTodayCount
+        )} ${this.wasWere(closedTodayCount)} closed`;
       }
       secondPart = secondPart ? (secondPart += " today.") : secondPart;
     }
@@ -144,8 +161,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
     // API missing, reviewers does not have a date :(
   }
 
-  findPRsOpenedToday() {
-    let payload = this.pullRequests;
+  findPRsOpenedToday(payload: DevOpsResponse) {
     let result = payload.value.filter(
       (pr) =>
         pr.creationDate &&
@@ -155,8 +171,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
     return result.length;
   }
 
-  findPRsClosedToday() {
-    let payload = this.pullRequests;
+  findPRsClosedToday(payload: DevOpsResponse) {
     let result = payload.value.filter(
       (pr) =>
         pr.closedDate &&
@@ -171,8 +186,7 @@ export abstract class DevOpsBaseClient implements IDevOpsClient {
       .tz("America/Los_Angeles")
       .isSame(moment(date2).tz("America/Los_Angeles"), "day");
   }
-}
-export class DevOpsClient extends DevOpsBaseClient implements IDevOpsClient {
+
   async fetchPullRequests() {
     this.pullRequests = await this.fetchPullRequestsInternal();
     //this.closedPullRequests = await this.fetchPullRequestsInternal(true);

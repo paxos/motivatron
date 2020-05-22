@@ -38,13 +38,12 @@ export class Motivatron {
       this.context.log(`Fetching DevOps for team ${team.name}…`);
       await devOpsClient.fetchPullRequests();
 
-      let result = [devOpsClient.getTextVSTS(), intercomResults.join(" ")];
-      let message = result.join(" ") + devOpsClient.PRsToURLList();
-
-      this.context.log(message);
-
       let slackClient = new SlackClient(this.context, team);
-      await slackClient.sendToSlack(message);
+      await slackClient.sendToSlack(
+        devOpsClient.getTextVSTS(),
+        intercomResults.join(" "),
+        devOpsClient.PRsToURLList()
+      );
     }
   }
 }
