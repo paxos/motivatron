@@ -32,6 +32,10 @@ export class IIntercomBaseClient {
   }
 
   getNotSnoozedOpenTickets(): number {
+    if (!this.tickets?.conversations) {
+      return 0;
+    }
+
     let ticketCount = this.tickets.conversations.length;
     let snoozed = this.tickets.conversations.filter(
       (entry) => entry.state === "snoozed"
