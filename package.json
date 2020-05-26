@@ -5,7 +5,7 @@
   "main": "dist/motivatron.js",
   "types": "dist/motivatron.d.ts",
   "name": "@paxos/motivatron",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "",
   "scripts": {
     "prepare": "tsc",
