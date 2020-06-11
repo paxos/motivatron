@@ -10,7 +10,9 @@
   "scripts": {
     "prepare": "tsc",
     "test": "jest --testPathPattern=/unit/",
-    "watch": "jest --watch"
+    "watch": "jest --watch",
+    "build": "tsc",
+    "build:strict": "tsc --strict"
   },
   "author": "Patrick Dinger",
   "repository": "git@github.com:paxos/motivatron.git",
