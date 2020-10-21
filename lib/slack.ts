@@ -11,7 +11,7 @@ export class SlackClient {
     this.team = team;
   }
 
-  makePayload(message: String): any {
+  makePayload(message: string): any {
     return {
       method: "post",
       headers: {

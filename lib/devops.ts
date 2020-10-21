@@ -61,7 +61,7 @@ export class DevOpsClient {
     return relevantPRs;
   }
 
-  filteredPullRequestsToURLList() : String[] {
+  filteredPullRequestsToURLList() : string[] {
     let pullRequests = this.filterPRs(
       this.findPRsWithNoVote(this.pullRequests)
     );
