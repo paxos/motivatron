@@ -5,14 +5,20 @@
       "slackIncomingHook": "",
       "intercomTeams": [
         {
+          "inboxName": "",
           "team": "",
           "token": ""
         }
       ],
       "devOpsTeams": [
         {
+          "name": "",
           "team": "",
-          "token": ""
+          "token": "",
+          "collection": "",
+          "project": "",
+          "repository": "",
+          "filters": [""]
         }
       ]
     }

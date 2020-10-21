@@ -87,7 +87,7 @@ describe("Unit Tests", function () {
       expect(sendToSlackInternalSpy).toBeCalledTimes(2);
       expect(sendToSlackInternalSpy).toHaveBeenNthCalledWith(
         1,
-          "2 PRs are waiting for review by coreUX:\n" +
+          "2 PRs are waiting for review by devops team 1:\n" +
           "- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n" +
           "- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n" +
           "Team #1 Inbox looks clear! 🙌 2 tickets on snooze."
@@ -95,7 +95,7 @@ describe("Unit Tests", function () {
 
       expect(sendToSlackInternalSpy).toHaveBeenNthCalledWith(
         2,
-          "2 PRs are waiting for review by Another team:\n" +
+          "2 PRs are waiting for review by devops team 1:\n" +
           "- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n" +
           "- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n" +
           "Inbox 1 looks clear! 🙌 2 tickets on snooze.\n" +
@@ -111,11 +111,11 @@ describe("Unit Tests", function () {
       await motivatron.doThings();
 
       expect(sendToSlackSpy.mock.calls[0][0][0]).toBe(
-        "1 PR is waiting for review (1 filtered) by coreUX:"
+        "1 PR is waiting for review (1 filtered) by devops team 1:"
       );
 
       expect(sendToSlackSpy.mock.calls[1][0][0]).toBe(
-        "2 PRs are waiting for review by Another team:"
+        "2 PRs are waiting for review by devops team 1:"
       );
     });
   });

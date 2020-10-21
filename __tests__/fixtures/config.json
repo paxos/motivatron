@@ -12,6 +12,7 @@
       ],
       "devOpsTeams": [
         {
+          "name": "devops team 1",
           "team": "011deb67-8b0b-4668-a530-5ffb4ffc022f",
           "token": "abc",
           "collection": "collection",
@@ -37,6 +38,7 @@
       ],
       "devOpsTeams": [
         {
+          "name": "devops team 1",
           "team": "011deb67-8b0b-4668-a530-5ffb4ffc022f",
           "token": "abc",
           "collection": "collection",

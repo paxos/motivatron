@@ -40,7 +40,7 @@ export class Motivatron {
 
         this.context.log(`Fetching DevOps for team ${devOpsTeam}…`);
         await devOpsClient.fetchPullRequests();
-        let teamSummary = devOpsClient.getTextAzureDevOps(team.name);
+        let teamSummary = devOpsClient.getTextAzureDevOps(devOpsTeam.name);
         let teamPRs = devOpsClient.filteredPullRequestsToURLList()
 
         finalMessage.push(teamSummary);

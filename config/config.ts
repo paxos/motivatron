@@ -18,6 +18,7 @@ export interface IIntercomTeam {
 }
 
 export interface IDevOpsTeam {
+  name: string;
   token: string;
   team: string;
   // Take an example URL: dev.azure.com/{collection}/{project}/_apis/git/repositories/{repository}/pullrequests?api-version=4.1
