@@ -87,12 +87,19 @@ describe("Unit Tests", function () {
       expect(sendToSlackInternalSpy).toBeCalledTimes(2);
       expect(sendToSlackInternalSpy).toHaveBeenNthCalledWith(
         1,
-        "2 PRs are waiting for review. Team #1 Inbox looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n"
+          "2 PRs are waiting for review by coreUX:\n" +
+          "- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n" +
+          "- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n" +
+          "Team #1 Inbox looks clear! 🙌 2 tickets on snooze."
       );
 
       expect(sendToSlackInternalSpy).toHaveBeenNthCalledWith(
         2,
-        "2 PRs are waiting for review. Inbox 1 looks clear! 🙌 2 tickets on snooze. Inbox 2 looks clear! 🙌 2 tickets on snooze.\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n"
+          "2 PRs are waiting for review by Another team:\n" +
+          "- https://dev.azure.com/collection/project/_git/repository/pullrequest/41111: PR Title 1\n" +
+          "- https://dev.azure.com/collection/project/_git/repository/pullrequest/1234: [Prefixed] PR Title 1\n" +
+          "Inbox 1 looks clear! 🙌 2 tickets on snooze.\n" +
+          "Inbox 2 looks clear! 🙌 2 tickets on snooze."
       );
     });
 
@@ -103,17 +110,12 @@ describe("Unit Tests", function () {
 
       await motivatron.doThings();
 
-      expect(sendToSlackSpy).toHaveBeenNthCalledWith(
-        1,
-        "1 PR is waiting for review (1 filtered).",
-        expect.anything(),
-        expect.anything()
+      expect(sendToSlackSpy.mock.calls[0][0][0]).toBe(
+        "1 PR is waiting for review (1 filtered) by coreUX:"
       );
-      expect(sendToSlackSpy).toHaveBeenNthCalledWith(
-        2,
-        "2 PRs are waiting for review.",
-        expect.anything(),
-        expect.anything()
+
+      expect(sendToSlackSpy.mock.calls[1][0][0]).toBe(
+        "2 PRs are waiting for review by Another team:"
       );
     });
   });

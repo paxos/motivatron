@@ -24,16 +24,10 @@ export class SlackClient {
     };
   }
 
-  async sendToSlack(
-    devOpsPart: string,
-    intercomPart: string,
-    urls: string
-  ): Promise<void> {
-    let result = [devOpsPart, intercomPart];
-    let message = result.join(" ") + urls;
-
-    this.context.log(message);
-    return this.sendToSlackInternal(message);
+  async sendToSlack(message: string[]): Promise<void> {
+    let messageString = message.join("\n")
+    this.context.log(messageString);
+    return this.sendToSlackInternal(messageString);
   }
   async sendToSlackInternal(message: string): Promise<void> {
     let options = this.makePayload(message);

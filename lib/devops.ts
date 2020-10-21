@@ -61,28 +61,24 @@ export class DevOpsClient {
     return relevantPRs;
   }
 
-  filteredPullRequestsToURLList() {
+  filteredPullRequestsToURLList() : String[] {
     let pullRequests = this.filterPRs(
       this.findPRsWithNoVote(this.pullRequests)
     );
     if (!pullRequests || !Array.isArray(pullRequests)) {
-      return "";
+      return [];
     }
 
-    let result = "";
+    let result = [];
     for (let pullRequest of pullRequests) {
-      result =
-        result +
-        `- https://dev.azure.com/${this.devOpsTeam.collection}/${this.devOpsTeam.project}/_git/${this.devOpsTeam.repository}/pullrequest/${pullRequest.pullRequestId}: ${pullRequest.title}\n`;
-    }
-
-    if (result !== "") {
-      result = "\n" + result;
+      result.push(
+          `- https://dev.azure.com/${this.devOpsTeam.collection}/${this.devOpsTeam.project}/_git/${this.devOpsTeam.repository}/pullrequest/${pullRequest.pullRequestId}: ${pullRequest.title}`
+      );
     }
     return result;
   }
 
-  getTextAzureDevOps() {
+  getTextAzureDevOps(teamName: string) : string {
     let openedTodayCount = this.findPRsOpenedToday(this.pullRequests);
     let closedTodayCount = this.findPRsClosedToday(this.pullRequests);
     let noReviewPRsList: PullRequest[] = this.findPRsWithNoVote(
@@ -120,8 +116,10 @@ export class DevOpsClient {
       firstPart += ` (${filteredPRCount} filtered)`;
     }
 
+    firstPart = firstPart + ` by ${teamName}`;
+
     if (openedTodayCount === 0 && closedTodayCount === 0) {
-      firstPart += ".";
+      firstPart += ":";
     } else {
       firstPart += ", ";
     }
@@ -137,7 +135,7 @@ export class DevOpsClient {
           closedTodayCount
         )} ${this.wasWere(closedTodayCount)} closed`;
       }
-      secondPart = secondPart ? (secondPart += " today.") : secondPart;
+      secondPart = secondPart ? (secondPart += " today:") : secondPart;
     }
     return firstPart + secondPart;
   }

@@ -32,18 +32,25 @@ export class Motivatron {
         intercomResults.push(await intercomClient.getText());
       }
 
-      let devOpsClient = new DevOpsClient(this.context, team.devOpsTeams[0]);
+      let finalMessage = [];
 
       // DevOps
-      this.context.log(`Fetching DevOps for team ${team.name}…`);
-      await devOpsClient.fetchPullRequests();
+      for (let devOpsTeam of team.devOpsTeams) {
+        let devOpsClient = new DevOpsClient(this.context, devOpsTeam);
+
+        this.context.log(`Fetching DevOps for team ${devOpsTeam}…`);
+        await devOpsClient.fetchPullRequests();
+        let teamSummary = devOpsClient.getTextAzureDevOps(team.name);
+        let teamPRs = devOpsClient.filteredPullRequestsToURLList()
+
+        finalMessage.push(teamSummary);
+        finalMessage.push(teamPRs.join("\n"));
+      }
+
+      finalMessage.push(intercomResults.join("\n"))
 
       let slackClient = new SlackClient(this.context, team);
-      await slackClient.sendToSlack(
-        devOpsClient.getTextAzureDevOps(),
-        intercomResults.join(" "),
-        devOpsClient.filteredPullRequestsToURLList()
-      );
+      await slackClient.sendToSlack(finalMessage);
     }
   }
 }
