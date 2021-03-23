@@ -31,6 +31,6 @@
     "prettier": "^2.2.1",
     "ts-jest": "^25.5.1",
     "ts-node": "^9.1.1",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.9"
   }
 }
